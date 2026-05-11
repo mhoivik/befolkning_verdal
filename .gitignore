@@ -13,8 +13,5 @@ venv/
 
 Thumbs.db
 
-# Data / output filer (valgfritt, siden du jobber med CSV)
-data.csv
-
 # Logs
 *.log
