@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+venv/
+.env/
+.venv/
+
+.vscode/
+
+.DS_Store
+
+Thumbs.db
+
+# Data / output filer (valgfritt, siden du jobber med CSV)
+data.csv
+
+# Logs
+*.log
