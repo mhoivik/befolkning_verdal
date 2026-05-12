@@ -24,6 +24,6 @@ class DataHenter:
             "Utflyttinger":         "utflytting",
             "Nettoinnflytting":     "netto_innflytting",
             "Folketilvekst":        "folketilvekst",
-        })
+        }, inplace=True)
         return df
     
