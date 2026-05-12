@@ -8,6 +8,7 @@ Programmet trenger noen biblioteker. Kjør derfor denne kommandoen i terminalen:
 
 ```bash
 pip install -r requirements.txt
+```bash
 
 ### 3. Resultat
 Programmet vil lage en mappe `grafer` og legg in grafene i png-format.
