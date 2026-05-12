@@ -1,4 +1,4 @@
-## Befolkningsanalysen i Verdal Kommune (R1)
+## Befolkningsanalyse av Verdal Kommune 1951-2025 (R1)
 
 ### 1. Data
 Programmet trenger CSV-filen `data.csv` eller `ubehandlet_data.csv`, som må ligge i samme mappe som programmet.
