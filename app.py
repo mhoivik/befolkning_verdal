@@ -27,11 +27,10 @@ class App:
             self.df.to_csv("data.csv")
         else:
             self.df = pd.read_csv('data.csv')
-            print("Fant data.csv")
-            print(self.df)
         
 
         grafer = Grafer(self.df)
+        grafer.Befolkning()
 
 
             
