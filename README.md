@@ -10,4 +10,4 @@ Programmet trenger noen biblioteker. Kjør derfor denne kommandoen i terminalen:
 pip install -r requirements.txt
 ```
 ### 3. Resultat
-Programmet vil lage en mappe `grafer` og legg in grafene i png-format.
+Programmet vil lage en mappe `grafer` og legger inn grafene i png-format.
