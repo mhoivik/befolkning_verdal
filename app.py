@@ -28,9 +28,11 @@ class App:
         self.df = pd.read_csv('data.csv')
         
 
-        grafer = Grafer(self.df)
-        # grafer.InnOgUtflytting()
-        grafer.Befolkning()
+        graf = Grafer(self.df)
+        graf.DekadeStatisktikkTabell()
+        # graf.Befolkning()
+        # graf.InnOgUtflytting()
+        # graf.NettoFlytting()
 
 
             

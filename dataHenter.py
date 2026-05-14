@@ -22,7 +22,7 @@ class DataHenter:
             "Fødselsoverskudd":     "fødselsoverskudd",
             "Innflyttinger":        "innflytting",
             "Utflyttinger":         "utflytting",
-            "Nettoinnflytting":     "netto_innflytting",
+            "Nettoinnflytting":     "netto_flytting",
             "Folketilvekst":        "folketilvekst",
         }, inplace=True)
         return df

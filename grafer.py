@@ -31,6 +31,7 @@ class Grafer:
         self.farge = {
             "bla": "#1a6fa8",
             "rod": "#c0392b",
+            "lyseBla" : "#64b5f6",
             "lyseGronn": "#27ae60",
             "lyseRod" : "#F05D40",
             "oransje": "#e67e22",
@@ -56,30 +57,67 @@ class Grafer:
 
         plt.figure(figsize=(15, 5))
         plt.plot(df["år"], df["befolkning"], color=self.farge["bla"], label="Befolkning")
+        plt.fill_between(df["år"], df["befolkning"], df.loc[df["år"].idxmin(), "befolkning"],
+                          color=self.farge["lyseBla"], alpha=0.4)
+        plt.annotate(f"Topp: {int(df["befolkning"].max()):,}".replace(',', ' '),
+                    xy=(int(df["år"][df["befolkning"].idxmax()]), int(df["befolkning"].max())),
+                    xycoords="data",
+                    arrowprops=dict(arrowstyle="->", facecolor=self.farge["kull"], lw=1.2),
+                    fontsize=8,
+                    color=self.farge["kull"],
+                    xytext=(-60, -40),
+                    textcoords="offset points",
+                    bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor=self.farge["kull"], alpha=0.8)
+                     )
+
+        plt.annotate(f"Bunn: {int(df["befolkning"].min()):,}".replace(',', ' '),
+                    xy=(int(df["år"][df["befolkning"].idxmin()]), int(df["befolkning"].min())),
+                    xycoords="data",
+                    arrowprops=dict(arrowstyle="->", facecolor=self.farge["kull"], lw=1.2),
+                    fontsize=8,
+                    color=self.farge["kull"],
+                    xytext=(5, 20),
+                    textcoords="offset points",
+                    bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor=self.farge["kull"], alpha=0.8)
+                     )
+
         y_lim = plt.ylim()
         x_lim = plt.xlim()
 
         # Glidende gjennomsnitt mm
         """
-        plt.plot(df["år"], self.analyse.LowessGlidendeRegresjon("befolkning"), color="black", label="Glidende Gjennomsnitt")
+        plt.plot(df["år"], self.analyse.GlidendeGjennomsnitt("befolkning"), color="black", label="Glidende Gjennomsnitt")
+        plt.plot(df["år"], self.analyse.LowessGlidendeRegresjon("befolkning"), color="black", label="Lowess")
+        plt.plot(df["år"], self.analyse.EksponensiellVektetGjennomsnitt("befolkning"), color="black", label="Lowess")
         """
 
         # Tangent
         """
         dataTangent = self.analyse.TangentDiskret("befolkning", 1974)
         plt.plot(df["år"], dataTangent["linje"], 
-                 label=f"{dataTangent['a']}x {'+' if dataTangent['b'] > 0 else '-'} {abs(dataTangent['b'])}")
+                 label=f"y = {dataTangent['a']}x {'+' if dataTangent['b'] > 0 else '-'} {abs(dataTangent['b'])}")
         plt.scatter(dataTangent['x'], dataTangent['y'], 
-                    label=f"({dataTangent['x']}, {dataTangent['y']})", color=self.farge["kull"], zorder=5)
+                    label=f"({np.int64(dataTangent['x'])}, {np.int64(dataTangent['y'])})", color=self.farge["kull"], zorder=5)
+        """
+        # Sekant
+        """
+        dataTangent = self.analyse.SekantDiskret("befolkning", 1970, 1980)
+        plt.plot(df["år"], dataTangent["linje"], 
+                 label=f"y = {dataTangent['a']:g}x {'+' if dataTangent['b'] > 0 else '-'} {abs(dataTangent['b']):g}")
+        plt.scatter(dataTangent['x1'], dataTangent['y1'], 
+                    label=f"({np.int64(dataTangent['x1'])}, {np.int64(dataTangent['y1'])})", color=self.farge["kull"], zorder=5)
+        plt.scatter(dataTangent['x2'], dataTangent['y2'], 
+                    label=f"({np.int64(dataTangent['x2'])}, {np.int64(dataTangent['y2'])})", color=self.farge["kull"], zorder=5)
         """
 
+        
         # Regresjon 
         """
         plt.plot(df["år"], self.analyse.Regresjon("befolkning", 36, True), 
                  color=self.farge["rod"], label="Regresjon")
         """
 
-        # Første- og andrederivert
+        # Første- og andrederivert || Finn nullpunkt
         """
         regresjon = self.analyse.Regresjon("befolkning", 36)
         forsteDerivert = regresjon.deriv() 
@@ -90,6 +128,13 @@ class Grafer:
         print(list(map(float, self.analyse.FinnNullpunkt(regresjon))))
         print(list(map(float, self.analyse.FinnNullpunkt(forsteDerivert))))
         print(list(map(float, self.analyse.FinnNullpunkt(andreDerivert))))
+        """
+
+        # Aker etb
+        """
+        plt.axvline(x=1971.0, color=self.farge["kull"], 
+                    label="Verftet åpnet (1969)", linestyle=":")
+        plt.annotate("Etablering av verft (1969)", (1972, 910), color=self.farge["kull"])
         """
 
         plt.title("Befolkning Verdal Kommune 1951-2025")
@@ -114,21 +159,37 @@ class Grafer:
     def InnOgUtflytting(self):
         df = self.df
 
-        plt.figure()
-        plt.plot(df["år"], df["innflytting"], color="green", label="Innflytting")
-        plt.plot(df["år"], df["utflytting"], color="red", label="Utflytting")
+        plt.figure(figsize=(16,9))
+        plt.plot(df["år"], df["innflytting"], color=self.farge["lyseGronn"], label="Innflytting")
+        plt.plot(df["år"], df["utflytting"], color=self.farge["lyseRod"], label="Utflytting")
+
+
+        # lowess
+        """
         plt.plot(
             df["år"],
             self.analyse.LowessGlidendeRegresjon("innflytting"),
-            color="black",
+            color=self.farge["oliven"],
             label="Lowess regresjon - Innflytting",
+            alpha=0.7,
+            linestyle=":"
         )
         plt.plot(
             df["år"],
             self.analyse.LowessGlidendeRegresjon("utflytting"),
-            color="gray",
+            color=self.farge["morkRod"],
             label="Lowess regresjon - Utfytting",
+            alpha=0.7,
+            linestyle=":"
         )
+        """
+
+        # Aker etb
+        """
+        plt.axvline(x=1971.0, color=self.farge["kull"], 
+                    label="Verftet åpnet (1969)", linestyle="--")
+        plt.annotate("Etablering av verft (1969)", (1972, 910), color=self.farge["kull"])
+        """
 
         plt.title("Inn- og utflytting Verdal Kommune 1951-2025")
         plt.xlabel("År")
@@ -141,8 +202,61 @@ class Grafer:
         plt.show()
         return
 
+    def NettoFlytting(self):
+        df = self.df
+        
+        plt.figure(figsize=(16,9))
+
+        plt.plot(df["år"], df["netto_flytting"],
+                color=self.farge["sand"],
+                label="Netto flytting"
+                )
+        plt.axhline(y=0, linestyle="--", color=self.farge["kull"], alpha=0.6)
+        plt.fill_between(df["år"], df["netto_flytting"], 0, where=(df["netto_flytting"] > 0),
+                         color=self.farge["lyseGronn"],
+                         alpha=0.4,
+                         interpolate=True
+                         )
+        plt.fill_between(df["år"], df["netto_flytting"], 0, where=(df["netto_flytting"] < 0),
+                         color=self.farge["lyseRod"],
+                         alpha=0.4,
+                         interpolate=True
+                         )
+
+        plt.plot(
+            df["år"],
+            self.analyse.LowessGlidendeRegresjon("netto_flytting"),
+            color=self.farge["oliven"],
+            label="Lowess frac=0.2",
+            alpha=0.7,
+            linestyle=":"
+        )
+
+        plt.title("Netto flytting Verdal Kommune 1951 - 2025")
+        plt.xlabel("År")
+        plt.ylabel("Antall")
+
+        plt.legend(frameon=False)
+        plt.show()
+
     def StatistikkTabell(self):
         df = self.df
+        return
+    
+    def DekadeStatisktikkTabell(self):
+        df = self.df
+
+        df["fødsels_prosent"] = df["fødte"] / df["befolkning"] * 100
+        df["døde_prosent"] = df["døde"] / df["befolkning"] * 100
+        df["flytte_prosent"] = df["netto_flytting"] / df["befolkning"] * 100
+
+        df["dekade"] = (df["år"] // 10) * 10
+        gruppe = df.groupby("dekade", as_index=False)[
+            ["fødsels_prosent", "døde_prosent", "flytte_prosent"]].mean()
+
+        avrundetGruppe = gruppe.round(2)
+        header = ["Tiår", "Andel føde", "Andel døde", "Andel flyttet"]
+                
         return
 
     def KjorAlle(self):
