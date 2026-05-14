@@ -18,6 +18,7 @@ class App:
 
     
     def Run(self):
+        # sjekker at filen(e) er i orden
         if not self.Finnes("data.csv"):
             if not self.Finnes("ubehandlet_data.csv"):
                 print("Error: Mangler inndata, kunne ikke kjøre programmet")
@@ -29,11 +30,12 @@ class App:
         
 
         graf = Grafer(self.df)
-        graf.DekadeStatisktikkTabell()
-        # graf.Befolkning()
+        # graf.DekadeStatisktikkTabell()
+        graf.Befolkning()
         # graf.InnOgUtflytting()
         # graf.NettoFlytting()
-
-
-            
-
+        # graf.Folketilveksten()
+        # graf.FodselsOverskudd()
+        # graf.DekadeStatisktikkTabell()
+        # graf.IllustrerStandardavvik("befolkning")
+        

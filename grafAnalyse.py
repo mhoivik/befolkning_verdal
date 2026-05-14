@@ -5,12 +5,18 @@ import statsmodels.api as sm
 
 
 class GrafAnalyse:
+    """ Implementering av metoder for analyse av data.
+        Mesteparten er hentet fra 7D, men og litt fra resten av R1 boka """
     def __init__(self, df):
         self.df = df
         return
 
+    def LeggInnKolonne(self, kolonneNavn, kolonne):
+        self.df[kolonneNavn] = kolonne
+
+
     def FinnNullpunkt(self, polynom, definisjonsmengde=True):
-        df = self.df
+        df = self.df.copy()     # .copy() fordi at df egenlig er en ptr. Bedre prakis
         roots = polynom.roots()
         reelleTall = roots[np.isreal(roots)].real
         innenDefinisjonsmengde = [i for i in reelleTall if df["år"].min() <= i <= df["år"].max()]
@@ -18,7 +24,7 @@ class GrafAnalyse:
     
 
     def Regresjon(self, kolonneNavn, grad=4, punktListe=False):
-        df = self.df
+        df = self.df.copy()
         x_akse = np.array(df["år"])
         y_akse = np.array(df[kolonneNavn])
 
@@ -28,7 +34,7 @@ class GrafAnalyse:
 
 
     def TangentDiskret(self, kolonneNavn, x0=1975):
-        df = self.df
+        df = self.df.copy()
         if not int(x0) in df["år"].values:
             raise ValueError("x_koordinat tilhører ikke til definerte x-verdier")
 
@@ -51,7 +57,7 @@ class GrafAnalyse:
         }
     
     def SekantDiskret(self, kolonneNavn, x1=1970, x2=1980):
-        df = self.df
+        df = self.df.copy()
 
         if not int(x1) in df["år"].values:
             raise ValueError("x_koordinat tilhører ikke til definerte x-verdier")
@@ -82,7 +88,6 @@ class GrafAnalyse:
     def GlidendeGjennomsnitt(self, kolonneNavn, k=7):
         return self.df[kolonneNavn].rolling(window=k).mean()
 
-    
     def EksponensiellVektetGjennomsnitt(self, kolonneNavn, k=7):
         return self.df[kolonneNavn].ewm(span=k).mean()
 
