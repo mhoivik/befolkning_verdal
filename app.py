@@ -27,15 +27,17 @@ class App:
             self.df = DataHenter(self.stiUsorterData).FormaterData()
             self.df.to_csv("data.csv")
         self.df = pd.read_csv('data.csv')
+        """ Profesjonell index reseting  """
         
 
         graf = Grafer(self.df)
         # graf.DekadeStatisktikkTabell()
-        graf.Befolkning()
+        # graf.Befolkning()
         # graf.InnOgUtflytting()
         # graf.NettoFlytting()
         # graf.Folketilveksten()
         # graf.FodselsOverskudd()
-        # graf.DekadeStatisktikkTabell()
+
+        """Ikke Implementer"""
         # graf.IllustrerStandardavvik("befolkning")
         

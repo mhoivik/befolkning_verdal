@@ -6,13 +6,19 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 import os
+"""
+Kommentarer, prinsipp og ekstrainformasjon, tankegang finnes i Grafer::Befolkning(). 
+Resten av funksjonene ligner veldig og er ikke like bra dokumentert
 
+"""
 
 class Grafer:
+    """Tegner (og lagrer) grafer"""
     def __init__(self, df, outputMappe="grafer"):
-        self.df = df
+        self.df = df.copy() # .copy() for å lag en kopi og ikke bare bruke ptr til objektet. (bedre sikkerhet)
         self.analyse = GrafAnalyse(df)
 
+        # design til grafene
         self.StandardStil()
 
         self.sti = outputMappe
@@ -50,12 +56,14 @@ class Grafer:
         }
 
     def Lagre(self):
+        print("ikke impl")
         return
 
-    def Befolkning(self):
-        df = self.df.copy()
 
-        plt.figure(figsize=(15, 5))
+    def Befolkning(self):
+        df = self.df.copy() # .copy() her også, for å være sikker på df er uendret
+
+        plt.figure(figsize=(16, 9))
         plt.plot(
             df["år"], df["befolkning"], color=self.farge["bla"], label="Befolkning"
         )
@@ -66,6 +74,7 @@ class Grafer:
             color=self.farge["lyseBla"],
             alpha=0.4,
         )
+
         plt.annotate(
             f"Topp: {int(df['befolkning'].max()):,}".replace(",", " "),
             xy=(int(df["år"][df["befolkning"].idxmax()]), int(df["befolkning"].max())),
@@ -100,6 +109,7 @@ class Grafer:
             ),
         )
 
+        # Lagrer bestemelsen av grensene av aksene, før andre grafer kan påvirke
         y_lim = plt.ylim()
         x_lim = plt.xlim()
 
@@ -118,6 +128,7 @@ class Grafer:
         plt.scatter(dataTangent['x'], dataTangent['y'], 
                     label=f"({np.int64(dataTangent['x'])}, {np.int64(dataTangent['y'])})", color=self.farge["kull"], zorder=5)
         """
+
         # Sekant
         """
         dataTangent = self.analyse.SekantDiskret("befolkning", 1970, 1980)
@@ -129,7 +140,7 @@ class Grafer:
                     label=f"({np.int64(dataTangent['x2'])}, {np.int64(dataTangent['y2'])})", color=self.farge["kull"], zorder=5)
         """
 
-        # Regresjon
+        # Regresjon (ligner litt på en Taylor serie)
         """
         plt.plot(df["år"], self.analyse.Regresjon("befolkning", 36, True), 
                  color=self.farge["rod"], label="Regresjon")
@@ -148,7 +159,7 @@ class Grafer:
         print(list(map(float, self.analyse.FinnNullpunkt(andreDerivert))))
         """
 
-        # Aker etb
+        # Aker etb linje
         """
         plt.axvline(x=1971.0, color=self.farge["kull"], 
                     label="Verftet åpnet (1969)", linestyle=":")
@@ -159,6 +170,7 @@ class Grafer:
         plt.xlabel("År")
         plt.ylabel("Befolkning")
 
+        # Setter grafene til de definerte målene
         plt.xlim(x_lim)
         plt.ylim(y_lim)
 
@@ -444,6 +456,7 @@ class Grafer:
         df = self.df.copy()
         std = self.df[["fødte", "døde", "innflytting", "utflytting"]].std()
         mean = self.df[["fødte", "døde", "innflytting", "utflytting"]].mean()
+        print("ikke impl")
         return
 
 
