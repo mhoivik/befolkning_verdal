@@ -4,16 +4,16 @@ import pandas as pd
 import statsmodels.api as sm
 
 
+"""Implementering av metoder for analyse av data.
+Mesteparten er hentet fra 7D, men og litt fra resten av R1 boka"""
 class GrafAnalyse:
-    """ Implementering av metoder for analyse av data.
-        Mesteparten er hentet fra 7D, men og litt fra resten av R1 boka """
-    def __init__(self, df):
+    def __init__(self, df) -> None:
         self.df = df.copy()
         return
 
     # df = self.df bruker ikke .copy() i metodene pågrunn av muligheten til at ha tangent/sekant på trendlinjer
     # Disse legges inn i GrafAnalyse sin DataFrame
-    def LeggInnKolonne(self, kolonneNavn, kolonne):
+    def LeggInnKolonne(self, kolonneNavn, kolonne) -> None:
         self.df[kolonneNavn] = kolonne 
 
 

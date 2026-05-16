@@ -1,11 +1,18 @@
-from grafAnalyse import GrafAnalyse
+import os
+import inspect
 
 import numpy as np
 from numpy.polynomial import Polynomial
 import pandas as pd
 import matplotlib.pyplot as plt
 
-import os
+from logger import Logg
+import konfig
+from grafAnalyse import GrafAnalyse
+
+
+
+
 """
 Kommentarer, prinsipp og ekstrainformasjon, tankegang finnes i Grafer::Befolkning(). 
 Resten av funksjonene ligner veldig og er ikke like bra dokumentert
@@ -14,17 +21,31 @@ Resten av funksjonene ligner veldig og er ikke like bra dokumentert
 
 class Grafer:
     """Tegner (og lagrer) grafer"""
-    def __init__(self, df, outputMappe="grafer"):
+    def __init__(self, df: pd.DataFrame, outputMappe: str="grafer") -> None:
         self.df = df.copy() # .copy() for å lag en kopi og ikke bare bruke ptr til objektet. (bedre sikkerhet)
         self.analyse = GrafAnalyse(df)
 
         # design til grafene
-        self.StandardStil()
+        self.__StandardStil()
 
-        self.sti = outputMappe
-        os.makedirs(self.sti, exist_ok=True)
+        self.mappe = outputMappe
+        os.makedirs(self.mappe, exist_ok=True)
+        Logg(self, "Konstruktør variabler OK")
 
-    def StandardStil(self):
+# PRIVATE:
+
+    def __Ferdigstill(self, filNavn: str = None) -> None:
+        if filNavn is None: filNavn = f"{inspect.stack()[1].function.lower()}.png"
+        if konfig.SKRIV_TIL_PNG:
+            sti = os.path.join(self.mappe, filNavn)
+            plt.savefig(sti, dpi=150, bbox_inches="tight", facecolor="white")
+            plt.close()
+        else:
+            plt.show()
+        Logg(self, f"{inspect.stack()[1].function} er ferdig")
+
+
+    def __StandardStil(self) -> None:
         plt.style.use("ggplot")
         plt.rcParams.update(
             {
@@ -55,19 +76,18 @@ class Grafer:
             "gra": "#7f8c8d",
         }
 
-    def Lagre(self):
-        print("ikke impl")
-        return
 
 
-    def Befolkning(self):
-        df = self.df.copy() # .copy() her også, for å være sikker på df er uendret
+# PUBLIC:
 
-        plt.figure(figsize=(16, 9))
-        plt.plot(
+    def Befolkning(self) -> None:   # -> None viser at funksjonen ikke returner noe (void). Øker typesikkerhet
+        df = self.df.copy()         # .copy() her også, for å være sikker på df er uendret
+
+        plt.figure(figsize=(16, 5)) # Dimmensjon på vinduet
+        plt.plot(                   # selve grafen
             df["år"], df["befolkning"], color=self.farge["bla"], label="Befolkning"
         )
-        plt.fill_between(
+        plt.fill_between(           # fyllmassen under grafen
             df["år"],
             df["befolkning"],
             df.loc[df["år"].idxmin(), "befolkning"],
@@ -75,7 +95,7 @@ class Grafer:
             alpha=0.4,
         )
 
-        plt.annotate(
+        plt.annotate(               # tekst med info om toppunktet, med pil og tekstboks
             f"Topp: {int(df['befolkning'].max()):,}".replace(",", " "),
             xy=(int(df["år"][df["befolkning"].idxmax()]), int(df["befolkning"].max())),
             xycoords="data",
@@ -92,7 +112,7 @@ class Grafer:
             ),
         )
 
-        plt.annotate(
+        plt.annotate( # ---""-----
             f"Bunn: {int(df['befolkning'].min()):,}".replace(",", " "),
             xy=(int(df["år"][df["befolkning"].idxmin()]), int(df["befolkning"].min())),
             xycoords="data",
@@ -113,31 +133,34 @@ class Grafer:
         y_lim = plt.ylim()
         x_lim = plt.xlim()
 
+
+        # EKSEMPLER FOR DATAANALYSE-VERKTØY:
+
         # Glidende gjennomsnitt mm
         """
         plt.plot(df["år"], self.analyse.GlidendeGjennomsnitt("befolkning"), color="black", label="Glidende Gjennomsnitt")
-        plt.plot(df["år"], self.analyse.LowessGlidendeRegresjon("befolkning"), color="black", label="Lowess")
-        plt.plot(df["år"], self.analyse.EksponensiellVektetGjennomsnitt("befolkning"), color="black", label="Lowess")
+        plt.plot(df["år"], self.analyse.LowessGlidendeRegresjon("befolkning"), color="red", label="Lowess")
+        plt.plot(df["år"], self.analyse.EksponensiellVektetGjennomsnitt("befolkning"), color="green", label="EWM Gjennomsnitt")
         """
 
         # Tangent
         """
-        dataTangent = self.analyse.TangentDiskret("befolkning", 1974)
-        plt.plot(df["år"], dataTangent["linje"], 
-                 label=f"y = {dataTangent['a']}x {'+' if dataTangent['b'] > 0 else '-'} {abs(dataTangent['b'])}")
-        plt.scatter(dataTangent['x'], dataTangent['y'], 
-                    label=f"({np.int64(dataTangent['x'])}, {np.int64(dataTangent['y'])})", color=self.farge["kull"], zorder=5)
+        dataSekant = self.analyse.TangentDiskret("befolkning", 1974)
+        plt.plot(df["år"], dataSekant["linje"], 
+                 label=f"y = {dataSekant['a']}x {'+' if dataSekant['b'] > 0 else '-'} {abs(dataSekant['b'])}")
+        plt.scatter(dataSekant['x'], dataSekant['y'], 
+                    label=f"({np.int64(dataSekant['x'])}, {np.int64(dataSekant['y'])})", color=self.farge["kull"], zorder=5)
         """
 
         # Sekant
         """
-        dataTangent = self.analyse.SekantDiskret("befolkning", 1970, 1980)
-        plt.plot(df["år"], dataTangent["linje"], 
-                 label=f"y = {dataTangent['a']:g}x {'+' if dataTangent['b'] > 0 else '-'} {abs(dataTangent['b']):g}")
-        plt.scatter(dataTangent['x1'], dataTangent['y1'], 
-                    label=f"({np.int64(dataTangent['x1'])}, {np.int64(dataTangent['y1'])})", color=self.farge["kull"], zorder=5)
-        plt.scatter(dataTangent['x2'], dataTangent['y2'], 
-                    label=f"({np.int64(dataTangent['x2'])}, {np.int64(dataTangent['y2'])})", color=self.farge["kull"], zorder=5)
+        dataSekant = self.analyse.SekantDiskret("befolkning", 1970, 1980)
+        plt.plot(df["år"], dataSekant["linje"], 
+                 label=f"y = {dataSekant['a']:g}x {'+' if dataSekant['b'] > 0 else '-'} {abs(dataSekant['b']):g}")
+        plt.scatter(dataSekant['x1'], dataSekant['y1'], 
+                    label=f"({np.int64(dataSekant['x1'])}, {np.int64(dataSekant['y1'])})", color=self.farge["kull"], zorder=5)
+        plt.scatter(dataSekant['x2'], dataSekant['y2'], 
+                    label=f"({np.int64(dataSekant['x2'])}, {np.int64(dataSekant['y2'])})", color=self.farge["kull"], zorder=5)
         """
 
         # Regresjon (ligner litt på en Taylor serie)
@@ -159,13 +182,14 @@ class Grafer:
         print(list(map(float, self.analyse.FinnNullpunkt(andreDerivert))))
         """
 
-        # Aker etb linje
+        # Aker est linje
         """
         plt.axvline(x=1971.0, color=self.farge["kull"], 
                     label="Verftet åpnet (1969)", linestyle=":")
         plt.annotate("Etablering av verft (1969)", (1972, 910), color=self.farge["kull"])
         """
 
+        # Aksetitler
         plt.title("Befolkning Verdal Kommune 1951-2025")
         plt.xlabel("År")
         plt.ylabel("Befolkning")
@@ -174,19 +198,23 @@ class Grafer:
         plt.xlim(x_lim)
         plt.ylim(y_lim)
 
-        plt.legend(frameon=False)
-        plt.show()
-        return
+        plt.legend(frameon=False)   # Tekstboksen i hjørne med info om alle grafene inkl
+        self.__Ferdigstill()        # Lagrer grafen som png eller viser den i et vindu
 
-    def BefolkningsVekst(self):
+
+    def BefolkningsVekst(self) -> None:
+        """IKKE IMPL"""
         df = self.df.copy()
-        return
+        # self.__Ferdigstill()
 
-    def LevendefodtMotDode(self):
+
+    def LevendefodtMotDode(self) -> None:
+        """IKKE IMPL"""
         df = self.df.copy()
-        return
+        # self.__Ferdigstill()
 
-    def Folketilveksten(self):
+
+    def Folketilveksten(self) -> None:
         df = self.df.copy()
 
         plt.figure(figsize=(16, 9))
@@ -231,9 +259,9 @@ class Grafer:
         plt.ylabel("Antall")
 
         plt.legend(frameon=False)
-        plt.show()
+        self.__Ferdigstill()
 
-    def FodselsOverskudd(self):
+    def FodselsOverskudd(self) -> None:
         df = self.df.copy()
 
         plt.figure(figsize=(16, 9))
@@ -276,16 +304,18 @@ class Grafer:
 
         # Tangent til glidende regresjon
         """
-        tangentLowess = "fødselsoverskudd_glidende_snitt"
-        self.analyse.LeggInnKolonne(tangentLowess, self.analyse.LowessGlidendeRegresjon("fødselsoverskudd"))
-        dataTangent = self.analyse.TangentDiskret(tangentLowess, 2017)
-        plt.plot(self.analyse.df["år"], dataTangent["linje"], 
+        sekantLowess = "fødselsoverskudd_sekant"
+        self.analyse.LeggInnKolonne(sekantLowess, self.analyse.LowessGlidendeRegresjon("fødselsoverskudd"))
+        dataSekant = self.analyse.SekantDiskret(sekantLowess, 2019, 2025)
+        plt.plot(self.analyse.df["år"], dataSekant["linje"], 
                 linestyle="-.",
                 color="black",
-                label=f"y = {dataTangent['a']:.2f}x {'+' if dataTangent['b'] > 0 else '-'} {abs(dataTangent['b']):.2f}")
+                label=f"y = {dataSekant['a']:.2f}x {'+' if dataSekant['b'] > 0 else '-'} {abs(dataSekant['b']):.2f}")
 
-        plt.scatter(dataTangent['x'], dataTangent['y'], 
-                    label=f"({np.int64(dataTangent['x'])}, {np.int64(dataTangent['y'])})", color=self.farge["kull"], zorder=5)
+        plt.scatter(dataSekant["x1"], dataSekant["y1"], 
+                    label=f"({np.int64(dataSekant["x1"])}, {np.int64(dataSekant["y1"])})", color=self.farge["kull"], zorder=5)
+        plt.scatter(dataSekant["x2"], dataSekant["y2"], 
+                    label=f"({np.int64(dataSekant["x2"])}, {np.int64(dataSekant["y2"])})", color=self.farge["kull"], zorder=5)
         """
 
         plt.title(
@@ -295,10 +325,10 @@ class Grafer:
         plt.ylabel("Antall")
 
         plt.legend(frameon=False)
-        plt.show()
-        return
+        self.__Ferdigstill()
 
-    def InnOgUtflytting(self):
+
+    def InnOgUtflytting(self) -> None:
         df = self.df.copy()
 
         plt.figure(figsize=(16, 9))
@@ -347,8 +377,8 @@ class Grafer:
         # plt.xlim(1951, 2025)
 
         plt.legend(frameon=False)
-        plt.show()
-        return
+        self.__Ferdigstill()
+
 
     def NettoFlytting(self):
         df = self.df.copy()
@@ -395,13 +425,15 @@ class Grafer:
         plt.ylabel("Antall")
 
         plt.legend(frameon=False)
-        plt.show()
+        self.__Ferdigstill()
 
-    def StatistikkTabell(self):
+
+    def StatistikkTabell(self) -> None:
         df = self.df.copy()
-        return
+        # self.__Ferdigstill()
 
-    def DekadeStatisktikkTabell(self):
+
+    def DekadeStatisktikkTabell(self) -> None:
         df = self.df.copy()  # unngå å mutere self.df
         
         # prøver kompansere for døde bortkommenhet i df["befolkning"]
@@ -450,15 +482,21 @@ class Grafer:
             for j in range(len(header)):
                 tabell[(i, j)].set_facecolor("#eaf2fb" if i % 2 == 0 else "white")
         
-        plt.show()
+        self.__Ferdigstill()
 
-    def IllustrerStandardavvik(self, kolonneNavn):
+
+    def IllustrerStandardavvik(self) -> None:
         df = self.df.copy()
         std = self.df[["fødte", "døde", "innflytting", "utflytting"]].std()
         mean = self.df[["fødte", "døde", "innflytting", "utflytting"]].mean()
-        print("ikke impl")
-        return
+        # self.__Ferdigstill()
 
 
-    def KjorAlle(self):
-        return
+
+    def TegnAlleGrafer(self) -> None:
+        Logg(self, "Tegner alle grafer...")
+        for navn in dir(self):
+            if not navn.startswith("_") and navn.lower() != "tegnallegrafer":
+                metode = getattr(self, navn)
+                if callable(metode):
+                    metode()

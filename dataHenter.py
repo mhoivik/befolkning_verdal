@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 class DataHenter:
-    def __init__(self, filsti):
+    def __init__(self, filsti) -> None:
         self.filsti = filsti
     
     def FormaterData(self):
