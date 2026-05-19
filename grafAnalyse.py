@@ -9,6 +9,7 @@ import statsmodels.api as sm
 
 # - returntyper mangler for mange funksjoner. Legg dem til
 
+# - Kommentarer
 
 
 """Implementering av metoder for analyse av data.

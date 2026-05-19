@@ -13,6 +13,7 @@ from grafAnalyse import GrafAnalyse
 
 # ToDo
 # - Implementer LevendeDøde og stattabell
+# - Forklaring og kommentarer
 
 
 """
