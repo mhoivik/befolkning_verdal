@@ -7,6 +7,8 @@ import statsmodels.api as sm
 # - GrafAnalyse bør være stateless. bør ikke ha en egen instance av DataFrame
 # heller parameter x, y variabel. (pd.Series, dict, tup arr?)
 
+# - returntyper mangler for mange funksjoner. Legg dem til
+
 
 
 """Implementering av metoder for analyse av data.

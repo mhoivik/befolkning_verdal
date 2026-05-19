@@ -11,6 +11,8 @@ import konfig
 from grafAnalyse import GrafAnalyse
 
 
+# ToDo
+# - Implementer LevendeDøde og stattabell
 
 
 """
@@ -166,7 +168,7 @@ class Grafer:
 
         # Regresjon (ligner litt på en Taylor serie)
         """
-        plt.plot(df["år"], self.analyse.Regresjon("befolkning", 36, True), 
+        plt.plot(df["år"], self.analyse.Regresjon("befolkning", 5, True), 
                  color=self.farge["rod"], label="Regresjon")
         """
 
