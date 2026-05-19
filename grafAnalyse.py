@@ -3,17 +3,20 @@ from numpy.polynomial import Polynomial
 import pandas as pd
 import statsmodels.api as sm
 
+# To-Do
+# - GrafAnalyse bør være stateless. bør ikke ha en egen instance av DataFrame
+# heller parameter x, y variabel. (pd.Series, dict, tup arr?)
+
+
 
 """Implementering av metoder for analyse av data.
 Mesteparten er hentet fra 7D, men og litt fra resten av R1 boka"""
 class GrafAnalyse:
     def __init__(self, df) -> None:
         self.df = df.copy()
-        return
 
-    # df = self.df bruker ikke .copy() i metodene pågrunn av muligheten til at ha tangent/sekant på trendlinjer
     # Disse legges inn i GrafAnalyse sin DataFrame
-    def LeggInnKolonne(self, kolonneNavn, kolonne) -> None:
+    def LeggInnKolonne(self, kolonneNavn: str, kolonne) -> None:
         self.df[kolonneNavn] = kolonne 
 
 
@@ -25,7 +28,7 @@ class GrafAnalyse:
         return innenDefinisjonsmengde if definisjonsmengde else reelleTall
     
 
-    def Regresjon(self, kolonneNavn, grad=4, punktListe=False):
+    def Regresjon(self, kolonneNavn: str, grad=4, punktListe=False):
         df = self.df
         x_akse = np.array(df["år"])
         y_akse = np.array(df[kolonneNavn])
@@ -35,7 +38,7 @@ class GrafAnalyse:
         return modell(x_akse) if punktListe else modell
 
 
-    def TangentDiskret(self, kolonneNavn, x0=1975):
+    def TangentDiskret(self, kolonneNavn: str, x0=1975):
         df = self.df
         if not int(x0) in df["år"].values:
             raise ValueError("x_koordinat tilhører ikke til definerte x-verdier") # Hard feilmelding for å varsle programmereren
@@ -61,7 +64,7 @@ class GrafAnalyse:
             'y' :y0,
         }
     
-    def SekantDiskret(self, kolonneNavn, x1=1970, x2=1980):
+    def SekantDiskret(self, kolonneNavn: str, x1=1970, x2=1980):
         df = self.df
 
         if not int(x1) in df["år"].values:
@@ -90,12 +93,13 @@ class GrafAnalyse:
         }
 
 
-    def GlidendeGjennomsnitt(self, kolonneNavn, k=7):
+    def GlidendeGjennomsnitt(self, kolonneNavn: str, k=7):
         return self.df[kolonneNavn].rolling(window=k).mean()
 
-    def EksponensiellVektetGjennomsnitt(self, kolonneNavn, k=7):
+
+    def EksponensiellVektetGjennomsnitt(self, kolonneNavn: str, k=7):
         return self.df[kolonneNavn].ewm(span=k).mean()
 
     
-    def LowessGlidendeRegresjon(self, kolonneNavn, frac=0.2):
+    def LowessGlidendeRegresjon(self, kolonneNavn: str, frac=0.2):
         return sm.nonparametric.lowess(self.df[kolonneNavn], self.df["år"], frac=frac, return_sorted=False)

@@ -28,7 +28,7 @@ class App:
             return False
 
     
-    def Run(self):
+    def Run(self) -> None:
         # sjekker at filen(e) er i orden
         if not self.Finnes(self.stiData):
             if not self.Finnes(self.stiUsorterData):
@@ -37,8 +37,10 @@ class App:
             Logg(self, "Har ikke data.csv")
             Logg(self, "Behandler data...")
             self.df = DataHenter(self.stiUsorterData).FormaterData()
-            self.df.to_csv(self.stiData)
+            self.df.to_csv(self.stiData, index=False)
             Logg(self, "Data behandlet")
+
+
         self.df = pd.read_csv(self.stiData)
         """ Profesjonell index reseting"""
 

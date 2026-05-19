@@ -74,6 +74,7 @@ class Grafer:
             "oliven": "#6b8e23",
             "kull": "#34495e",
             "gra": "#7f8c8d",
+            "blaHvit": "#eaf2fb"
         }
 
 
@@ -81,7 +82,7 @@ class Grafer:
 # PUBLIC:
 
     def Befolkning(self) -> None:   # -> None viser at funksjonen ikke returner noe (void). Øker typesikkerhet
-        df = self.df.copy()         # .copy() her også, for å være sikker på df er uendret
+        df = self.df
 
         plt.figure(figsize=(16, 5)) # Dimmensjon på vinduet
         plt.plot(                   # selve grafen
@@ -95,7 +96,7 @@ class Grafer:
             alpha=0.4,
         )
 
-        plt.annotate(               # tekst med info om toppunktet, med pil og tekstboks
+        plt.annotate(               # Tekst med info om ekstremalpunktet, med pil og tekstboks
             f"Topp: {int(df['befolkning'].max()):,}".replace(",", " "),
             xy=(int(df["år"][df["befolkning"].idxmax()]), int(df["befolkning"].max())),
             xycoords="data",
@@ -112,7 +113,7 @@ class Grafer:
             ),
         )
 
-        plt.annotate( # ---""-----
+        plt.annotate(                # --""--
             f"Bunn: {int(df['befolkning'].min()):,}".replace(",", " "),
             xy=(int(df["år"][df["befolkning"].idxmin()]), int(df["befolkning"].min())),
             xycoords="data",
@@ -204,18 +205,18 @@ class Grafer:
 
     def BefolkningsVekst(self) -> None:
         """IKKE IMPL"""
-        df = self.df.copy()
+        df = self.df
         # self.__Ferdigstill()
 
 
     def LevendefodtMotDode(self) -> None:
         """IKKE IMPL"""
-        df = self.df.copy()
+        df = self.df
         # self.__Ferdigstill()
 
 
     def Folketilveksten(self) -> None:
-        df = self.df.copy()
+        df = self.df
 
         plt.figure(figsize=(16, 9))
 
@@ -262,7 +263,7 @@ class Grafer:
         self.__Ferdigstill()
 
     def FodselsOverskudd(self) -> None:
-        df = self.df.copy()
+        df = self.df
 
         plt.figure(figsize=(16, 9))
 
@@ -329,7 +330,7 @@ class Grafer:
 
 
     def InnOgUtflytting(self) -> None:
-        df = self.df.copy()
+        df = self.df
 
         plt.figure(figsize=(16, 9))
         plt.plot(
@@ -381,7 +382,7 @@ class Grafer:
 
 
     def NettoFlytting(self):
-        df = self.df.copy()
+        df = self.df
 
         plt.figure(figsize=(16, 9))
 
@@ -477,16 +478,16 @@ class Grafer:
             tabell[(0, j)].set_facecolor(self.farge["morkBla"])
             tabell[(0, j)].set_text_props(color="white", fontweight="bold")
         
-        # annjakvar farge på rækkan
+        # Går igjennom alle kolonner. Velger så annenhver kolonne nedover byttende farge
         for i in range(1, len(gruppe) + 1):
             for j in range(len(header)):
-                tabell[(i, j)].set_facecolor("#eaf2fb" if i % 2 == 0 else "white")
+                tabell[(i, j)].set_facecolor(self.farge["blaHvit"] if i % 2 == 0 else "white")
         
         self.__Ferdigstill()
 
 
     def IllustrerStandardavvik(self) -> None:
-        df = self.df.copy()
+        df = self.df
         std = self.df[["fødte", "døde", "innflytting", "utflytting"]].std()
         mean = self.df[["fødte", "døde", "innflytting", "utflytting"]].mean()
         # self.__Ferdigstill()

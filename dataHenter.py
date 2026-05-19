@@ -1,6 +1,4 @@
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt 
 
 
 class DataHenter:
@@ -25,5 +23,7 @@ class DataHenter:
             "Nettoinnflytting":     "netto_flytting",
             "Folketilvekst":        "folketilvekst",
         }, inplace=True)
+        df = df.reset_index()
+        df["år"] = df["år"].astype(int)
         return df
     

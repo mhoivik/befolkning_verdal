@@ -1,4 +1,5 @@
 grafer/
+temp/
 
 __pycache__/
 *.pyc
