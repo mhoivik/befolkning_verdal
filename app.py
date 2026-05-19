@@ -40,9 +40,7 @@ class App:
             self.df.to_csv(self.stiData, index=False)
             Logg(self, "Data behandlet")
 
-
         self.df = pd.read_csv(self.stiData)
-        """ Profesjonell index reseting"""
 
         Logg(self, "Fil godkjent")
         Logg(self, "Begynner med grafer")
@@ -52,15 +50,19 @@ class App:
         graf.TegnAlleGrafer()
 
         """Har Implementering"""
-        # graf.DekadeStatisktikkTabell()
+        # graf.DekadeStatistikkTabell()
         # graf.Befolkning()
-        # graf.InnOgUtflytting()
-        # graf.NettoFlytting()
+        # graf.LevendefodtMotDode()
         # graf.Folketilveksten()
         # graf.FodselsOverskudd()
-
+        # graf.InnOgUtflytting()
+        # graf.NettoFlytting()
+        # graf.StatistikkTabell()
+        # graf.DekadeStatistikkTabell()
+        
         """Ikke Implementer"""
         # graf.IllustrerStandardavvik("befolkning")
+        # graf.BefolkningsVekst()
 
 
         

@@ -2,7 +2,6 @@ import os
 import inspect
 
 import numpy as np
-from numpy.polynomial import Polynomial
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -12,7 +11,6 @@ from grafAnalyse import GrafAnalyse
 
 
 # ToDo
-# - Implementer LevendeDøde og stattabell
 # - Forklaring og kommentarer
 
 
@@ -87,7 +85,7 @@ class Grafer:
     def Befolkning(self) -> None:   # -> None viser at funksjonen ikke returner noe (void). Øker typesikkerhet
         df = self.df
 
-        plt.figure(figsize=(16, 5)) # Dimmensjon på vinduet
+        plt.figure(figsize=(16, 9)) # Dimmensjon på vinduet
         plt.plot(                   # selve grafen
             df["år"], df["befolkning"], color=self.farge["bla"], label="Befolkning"
         )
@@ -136,6 +134,16 @@ class Grafer:
         # Lagrer bestemelsen av grensene av aksene, før andre grafer kan påvirke
         y_lim = plt.ylim()
         x_lim = plt.xlim()
+        
+        
+        # Aker est linje
+        """"""
+        plt.axvline(x=1969.0, color=self.farge["kull"], 
+                    label="Verftet åpnet (1969)", linestyle=":")
+        plt.annotate("Etablering av verft (1969)", (1971, 910), color=self.farge["kull"])
+        """"""
+
+
 
 
         # EKSEMPLER FOR DATAANALYSE-VERKTØY:
@@ -157,15 +165,38 @@ class Grafer:
         """
 
         # Sekant
-        """
-        dataSekant = self.analyse.SekantDiskret("befolkning", 1970, 1980)
+        """"""
+        dataSekant = self.analyse.SekantDiskret("befolkning", 1969, 1980)
         plt.plot(df["år"], dataSekant["linje"], 
                  label=f"y = {dataSekant['a']:g}x {'+' if dataSekant['b'] > 0 else '-'} {abs(dataSekant['b']):g}")
         plt.scatter(dataSekant['x1'], dataSekant['y1'], 
                     label=f"({np.int64(dataSekant['x1'])}, {np.int64(dataSekant['y1'])})", color=self.farge["kull"], zorder=5)
         plt.scatter(dataSekant['x2'], dataSekant['y2'], 
                     label=f"({np.int64(dataSekant['x2'])}, {np.int64(dataSekant['y2'])})", color=self.farge["kull"], zorder=5)
+        """"""
+
+        # Projekter bane for folkevekst verdal
         """
+        dataSekant = self.analyse.SekantDiskret("befolkning", 1951, 1969)
+        plt.plot(df["år"], dataSekant["linje"], 
+                 label=f"y = {dataSekant['a']:g}x {'+' if dataSekant['b'] > 0 else '-'} {abs(dataSekant['b']):g}",
+                   color="blue", linestyle="--")
+        plt.scatter(dataSekant['x1'], dataSekant['y1'], 
+                    label=f"({np.int64(dataSekant['x1'])}, {np.int64(dataSekant['y1'])})", color=self.farge["kull"], zorder=5)
+        plt.scatter(dataSekant['x2'], dataSekant['y2'], 
+                    label=f"({np.int64(dataSekant['x2'])}, {np.int64(dataSekant['y2'])})", color=self.farge["kull"], zorder=5)
+        plt.fill_between(           # fyllmassen under grafen
+            df["år"],
+            df["befolkning"],
+            dataSekant["linje"],
+            where=df["befolkning"] > dataSekant["linje"],
+            color=self.farge["lyseGronn"],
+            alpha=0.4,
+        )
+        """
+
+
+
 
         # Regresjon (ligner litt på en Taylor serie)
         """
@@ -186,13 +217,6 @@ class Grafer:
         print(list(map(float, self.analyse.FinnNullpunkt(andreDerivert))))
         """
 
-        # Aker est linje
-        """
-        plt.axvline(x=1971.0, color=self.farge["kull"], 
-                    label="Verftet åpnet (1969)", linestyle=":")
-        plt.annotate("Etablering av verft (1969)", (1972, 910), color=self.farge["kull"])
-        """
-
         # Aksetitler
         plt.title("Befolkning Verdal Kommune 1951-2025")
         plt.xlabel("År")
@@ -202,7 +226,10 @@ class Grafer:
         plt.xlim(x_lim)
         plt.ylim(y_lim)
 
-        plt.legend(frameon=False)   # Tekstboksen i hjørne med info om alle grafene inkl
+        plt.legend(
+                frameon=False,
+                loc="upper left"
+                   )                # Tekstboksen i hjørne med info om alle grafene inkl
         self.__Ferdigstill()        # Lagrer grafen som png eller viser den i et vindu
 
 
@@ -213,9 +240,15 @@ class Grafer:
 
 
     def LevendefodtMotDode(self) -> None:
-        """IKKE IMPL"""
         df = self.df
-        # self.__Ferdigstill()
+        plt.figure()
+        plt.plot(df["år"], df["fødte"], color="red", label="Levendefodte")
+        plt.plot (df["år"], df["døde"],color="blue", label="Døde")
+        plt.title("Levendefodte_vs_døde - verdal 1951-2025")
+        plt.xlabel("År")
+        plt.ylabel("Antall")
+        plt.legend(frameon=False, loc="upper left")
+        self.__Ferdigstill() # plt.savefig(path)
 
 
     def Folketilveksten(self) -> None:
@@ -306,6 +339,9 @@ class Grafer:
             zorder=4,
         )
 
+        xLim = plt.xlim()
+        yLim = plt.ylim()
+
         # Tangent til glidende regresjon
         """
         sekantLowess = "fødselsoverskudd_sekant"
@@ -322,6 +358,8 @@ class Grafer:
                     label=f"({np.int64(dataSekant["x2"])}, {np.int64(dataSekant["y2"])})", color=self.farge["kull"], zorder=5)
         """
 
+        plt.xlim(xLim)
+        plt.ylim(yLim)
         plt.title(
             "Naturlig befolkningsvekst Verdal Kommune 1951 - 2025 (Levendefødte minus døde)"
         )
@@ -335,37 +373,36 @@ class Grafer:
     def InnOgUtflytting(self) -> None:
         df = self.df
 
-        plt.figure(figsize=(16, 9))
+        plt.figure()
         plt.plot(
             df["år"],
             df["innflytting"],
-            color=self.farge["lyseGronn"],
+            color=self.farge["oliven"],
             label="Innflytting",
         )
         plt.plot(
-            df["år"], df["utflytting"], color=self.farge["lyseRod"], label="Utflytting"
+            df["år"], df["utflytting"], 
+            color=self.farge["rosa"], 
+            label="Utflytting"
         )
-
-        # lowess
-        """
-        plt.plot(
+        plt.fill_between(
             df["år"],
-            self.analyse.LowessGlidendeRegresjon("innflytting"),
-            color=self.farge["oliven"],
-            label="Lowess regresjon - Innflytting",
-            alpha=0.7,
-            linestyle=":"
+            df["utflytting"],
+            df["innflytting"],
+            where=df["innflytting"] > df["utflytting"],
+            interpolate=True,
+            color=self.farge["lyseGronn"],
+            alpha=0.1
         )
-        plt.plot(
+        plt.fill_between(
             df["år"],
-            self.analyse.LowessGlidendeRegresjon("utflytting"),
-            color=self.farge["morkRod"],
-            label="Lowess regresjon - Utfytting",
-            alpha=0.7,
-            linestyle=":"
+            df["innflytting"],
+            df["utflytting"],
+            where=df["utflytting"] > df["innflytting"],
+            interpolate=True,
+            color=self.farge["lyseRod"],
+            alpha=0.1
         )
-        """
-
         # Aker etb
         """
         plt.axvline(x=1971.0, color=self.farge["kull"], 
@@ -377,11 +414,8 @@ class Grafer:
         plt.xlabel("År")
         plt.ylabel("Antall")
 
-        # plt.ylim()
-        # plt.xlim(1951, 2025)
-
-        plt.legend(frameon=False)
-        self.__Ferdigstill()
+        plt.legend(frameon=False, loc="upper left")
+        self.__Ferdigstill() # plt.savefig(path)
 
 
     def NettoFlytting(self):
@@ -424,7 +458,7 @@ class Grafer:
             linestyle=":",
         )
 
-        plt.title("Netto flytting Verdal Kommune 1951 - 2025")
+        plt.title("Nettoflytting Verdal Kommune 1951 - 2025")
         plt.xlabel("År")
         plt.ylabel("Antall")
 
@@ -433,39 +467,110 @@ class Grafer:
 
 
     def StatistikkTabell(self) -> None:
-        df = self.df.copy()
-        # self.__Ferdigstill()
+        df = self.df.copy()  # Unngå mutasjon på original df
 
-
-    def DekadeStatisktikkTabell(self) -> None:
-        df = self.df.copy()  # unngå å mutere self.df
+        opprinneligeKolonner = ["fødte", "døde", "netto_flytting", "folketilvekst"]
         
-        # prøver kompansere for døde bortkommenhet i df["befolkning"]
+        stats = df[opprinneligeKolonner].describe()
+        verdier = stats.loc[["mean", "std", "min", "25%", "75%", "max"]].round(1)
+        
+        # Beregn CV (Standardavvik / Gjennomsnitt) for hver kolonne
+        cvRad = (stats.loc["std"] / stats.loc["mean"]).round(2)
+        verdier.loc["CV"] = cvRad
+
+
+        # Legger inn "statistikk i toppen"
+        verdier = verdier.reset_index().rename(columns={"index": "Statistikk"})
+        verdier["Statistikk"] = verdier["Statistikk"].str.upper() 
+
+        kolonneTitel = [navn.replace("_", "").title() for navn in opprinneligeKolonner]
+        header = ["Statistikk"] + kolonneTitel 
+
+        plt.figure()
+        plt.axis("off")
+
+        tabell = plt.table(
+            cellText=verdier.values,
+            colLabels=header,
+            loc="center",
+            cellLoc="center",
+        )
+
+        tabell.auto_set_font_size(False)
+        tabell.set_fontsize(8.5)
+        tabell.scale(1, 1.6)
+
+        # damearbeid
+        for j in range(len(header)):
+            tabell[(0, j)].set_facecolor(self.farge["morkBla"])
+            tabell[(0, j)].set_text_props(color="white", fontweight="bold")
+
+        
+        for i in range(1, len(verdier) + 1):
+            for j in range(len(header)):
+                tabell[(i, j)].set_facecolor(
+                    self.farge["blaHvit"] if i % 2 == 0 else "white"
+                )
+
+        self.__Ferdigstill()
+
+
+
+
+
+
+    def DekadeStatistikkTabell(self) -> None:
+        df = self.df.copy() # .copy() for å slippe referanse(ptr) til df
+
+        # interpolerer resultatet 1.juli, for å kompensere for at folk dør
+        # Bruker 31.des for å med 2025
         df["befolkning_31des"] = df["befolkning"] + df["fødte"] - df["døde"] + df["netto_flytting"]
-        df["middelbefolkning"] = (df["befolkning"] + df["befolkning_31des"]) / 2
-        
-        # Regner prosenter
-        df["fødsels_prosent"] = df["fødte"] / df["middelbefolkning"] * 100
-        df["døde_prosent"]    = df["døde"]  / df["middelbefolkning"] * 100
-        df["flytte_prosent"]  = df["netto_flytting"] / df["middelbefolkning"] * 100
-        df["folketilvekst"]   = df["fødsels_prosent"] - df["døde_prosent"] + df["flytte_prosent"]
+        df["middelbefolkning"] = df["befolkning"] + df["befolkning_31des"] / 2
 
-        # tiår-gruppering
         df["dekade"] = (df["år"] // 10) * 10
         gruppe = df.groupby("dekade", as_index=False)[
-            ["fødsels_prosent", "døde_prosent", "flytte_prosent", "folketilvekst"]
-        ].mean()
+            ["fødte", "døde", "netto_flytting", "folketilvekst", "middelbefolkning"]
+        ].sum()
+
+
+        gruppe["fødsels_prosent"] = gruppe["fødte"] / gruppe["middelbefolkning"] * 100
+        gruppe["døde_prosent"] = gruppe["døde"] / gruppe["middelbefolkning"] * 100
+        gruppe["flytte_prosent"] = gruppe["netto_flytting"] / gruppe["middelbefolkning"] * 100
+        gruppe["folketilvekst_prosent"] = gruppe["folketilvekst"] / gruppe["middelbefolkning"] * 100
+
+        kolonnerTilTabell = [
+            "dekade",
+            "fødsels_prosent",
+            "døde_prosent",
+            "flytte_prosent",
+            "folketilvekst_prosent",
+        ]
+        gruppe = gruppe[kolonnerTilTabell]
 
         # Tabellformatering
         gruppe = gruppe.round(2)
         gruppe["dekade"] = gruppe["dekade"].astype(int).astype(str)
-        for col in ["fødsels_prosent", "døde_prosent", "flytte_prosent", "folketilvekst"]:
-            gruppe[col] = gruppe[col].astype(str) + "%"
+        kolonnerProsent = [
+            "fødsels_prosent",
+            "døde_prosent",
+            "flytte_prosent",
+            "folketilvekst_prosent",
+        ]
+        for kol in kolonnerProsent:
+            gruppe[kol] = gruppe[kol].astype(str) + "%"
 
-        header = ["Tiår", "Andel fødte", "Andel døde", "Andel flyttet", "Folketilvekst"]
-        
+        header = [
+            "Tiår",
+            "Andel fødte",
+            "Andel døde",
+            "Andel flyttet",
+            "Folketilvekst",
+        ]
+
         plt.figure()
         plt.axis("off")
+
+
         tabell = plt.table(
             cellText=gruppe.values,
             colLabels=header,
@@ -475,18 +580,20 @@ class Grafer:
         tabell.auto_set_font_size(False)
         tabell.set_fontsize(8.5)
         tabell.scale(1, 1.6)
-        
-        # farge på header
+
+        # fargelegging
         for j in range(len(header)):
             tabell[(0, j)].set_facecolor(self.farge["morkBla"])
             tabell[(0, j)].set_text_props(color="white", fontweight="bold")
-        
-        # Går igjennom alle kolonner. Velger så annenhver kolonne nedover byttende farge
+
         for i in range(1, len(gruppe) + 1):
             for j in range(len(header)):
-                tabell[(i, j)].set_facecolor(self.farge["blaHvit"] if i % 2 == 0 else "white")
-        
+                tabell[(i, j)].set_facecolor(
+                    self.farge["blaHvit"] if i % 2 == 0 else "white"
+                )
+
         self.__Ferdigstill()
+
 
 
     def IllustrerStandardavvik(self) -> None:
