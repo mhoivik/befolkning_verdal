@@ -1,5 +1,6 @@
 import os
 import inspect
+import random
 
 import numpy as np
 import pandas as pd
@@ -20,10 +21,12 @@ Resten av funksjonene ligner veldig og er ikke like bra dokumentert
 
 """
 
+
 class Grafer:
     """Tegner (og lagrer) grafer"""
-    def __init__(self, df: pd.DataFrame, outputMappe: str="grafer") -> None:
-        self.df = df.copy() # .copy() for å lag en kopi og ikke bare bruke ptr til objektet. (bedre sikkerhet)
+
+    def __init__(self, df: pd.DataFrame, outputMappe: str = "grafer") -> None:
+        self.df = df.copy()  # .copy() for å lag en kopi og ikke bare bruke ptr til objektet. (bedre sikkerhet)
         self.analyse = GrafAnalyse(df)
 
         # design til grafene
@@ -33,10 +36,11 @@ class Grafer:
         os.makedirs(self.mappe, exist_ok=True)
         Logg(self, "Konstruktør variabler OK")
 
-# PRIVATE:
+    # PRIVATE:
 
     def __Ferdigstill(self, filNavn: str = None) -> None:
-        if filNavn is None: filNavn = f"{inspect.stack()[1].function.lower()}.png"
+        if filNavn is None:
+            filNavn = f"{inspect.stack()[1].function.lower()}.png"
         if konfig.SKRIV_TIL_PNG:
             sti = os.path.join(self.mappe, filNavn)
             plt.savefig(sti, dpi=150, bbox_inches="tight", facecolor="white")
@@ -44,7 +48,6 @@ class Grafer:
         else:
             plt.show()
         Logg(self, f"{inspect.stack()[1].function} er ferdig")
-
 
     def __StandardStil(self) -> None:
         plt.style.use("ggplot")
@@ -75,21 +78,23 @@ class Grafer:
             "oliven": "#6b8e23",
             "kull": "#34495e",
             "gra": "#7f8c8d",
-            "blaHvit": "#eaf2fb"
+            "blaHvit": "#eaf2fb",
         }
 
+    # PUBLIC:
 
-
-# PUBLIC:
-
-    def Befolkning(self) -> None:   # -> None viser at funksjonen ikke returner noe (void). Øker typesikkerhet
+    def Befolkning(
+        self,
+    ) -> (
+        None
+    ):  # -> None viser at funksjonen ikke returner noe (void). Øker typesikkerhet
         df = self.df
 
-        plt.figure(figsize=(16, 9)) # Dimmensjon på vinduet
-        plt.plot(                   # selve grafen
+        plt.figure(figsize=(16, 9))  # Dimmensjon på vinduet
+        plt.plot(  # selve grafen
             df["år"], df["befolkning"], color=self.farge["bla"], label="Befolkning"
         )
-        plt.fill_between(           # fyllmassen under grafen
+        plt.fill_between(  # fyllmassen under grafen
             df["år"],
             df["befolkning"],
             df.loc[df["år"].idxmin(), "befolkning"],
@@ -97,7 +102,7 @@ class Grafer:
             alpha=0.4,
         )
 
-        plt.annotate(               # Tekst med info om ekstremalpunktet, med pil og tekstboks
+        plt.annotate(  # Tekst med info om ekstremalpunktet, med pil og tekstboks
             f"Topp: {int(df['befolkning'].max()):,}".replace(",", " "),
             xy=(int(df["år"][df["befolkning"].idxmax()]), int(df["befolkning"].max())),
             xycoords="data",
@@ -114,7 +119,7 @@ class Grafer:
             ),
         )
 
-        plt.annotate(                # --""--
+        plt.annotate(  # --""--
             f"Bunn: {int(df['befolkning'].min()):,}".replace(",", " "),
             xy=(int(df["år"][df["befolkning"].idxmin()]), int(df["befolkning"].min())),
             xycoords="data",
@@ -134,17 +139,19 @@ class Grafer:
         # Lagrer bestemelsen av grensene av aksene, før andre grafer kan påvirke
         y_lim = plt.ylim()
         x_lim = plt.xlim()
-        
-        
+
         # Aker est linje
         """"""
-        plt.axvline(x=1969.0, color=self.farge["kull"], 
-                    label="Verftet åpnet (1969)", linestyle=":")
-        plt.annotate("Etablering av verft (1969)", (1971, 910), color=self.farge["kull"])
+        plt.axvline(
+            x=1969.0,
+            color=self.farge["kull"],
+            label="Verftet åpnet (1969)",
+            linestyle=":",
+        )
+        plt.annotate(
+            "Etablering av verft (1969)", (1971, 910), color=self.farge["kull"]
+        )
         """"""
-
-
-
 
         # EKSEMPLER FOR DATAANALYSE-VERKTØY:
 
@@ -164,8 +171,8 @@ class Grafer:
                     label=f"({np.int64(dataSekant['x'])}, {np.int64(dataSekant['y'])})", color=self.farge["kull"], zorder=5)
         """
 
-        # Sekant
-        """"""
+        # Sekant etter aker
+        """
         dataSekant = self.analyse.SekantDiskret("befolkning", 1969, 1980)
         plt.plot(df["år"], dataSekant["linje"], 
                  label=f"y = {dataSekant['a']:g}x {'+' if dataSekant['b'] > 0 else '-'} {abs(dataSekant['b']):g}")
@@ -173,7 +180,7 @@ class Grafer:
                     label=f"({np.int64(dataSekant['x1'])}, {np.int64(dataSekant['y1'])})", color=self.farge["kull"], zorder=5)
         plt.scatter(dataSekant['x2'], dataSekant['y2'], 
                     label=f"({np.int64(dataSekant['x2'])}, {np.int64(dataSekant['y2'])})", color=self.farge["kull"], zorder=5)
-        """"""
+        """
 
         # Projekter bane for folkevekst verdal
         """
@@ -192,11 +199,9 @@ class Grafer:
             where=df["befolkning"] > dataSekant["linje"],
             color=self.farge["lyseGronn"],
             alpha=0.4,
+            interpolate=True
         )
         """
-
-
-
 
         # Regresjon (ligner litt på en Taylor serie)
         """
@@ -227,29 +232,25 @@ class Grafer:
         plt.ylim(y_lim)
 
         plt.legend(
-                frameon=False,
-                loc="upper left"
-                   )                # Tekstboksen i hjørne med info om alle grafene inkl
-        self.__Ferdigstill()        # Lagrer grafen som png eller viser den i et vindu
-
+            frameon=False, loc="upper left"
+        )  # Tekstboksen i hjørne med info om alle grafene inkl
+        self.__Ferdigstill()  # Lagrer grafen som png eller viser den i et vindu
 
     def BefolkningsVekst(self) -> None:
         """IKKE IMPL"""
         df = self.df
         # self.__Ferdigstill()
 
-
     def LevendefodtMotDode(self) -> None:
         df = self.df
         plt.figure()
-        plt.plot(df["år"], df["fødte"], color="red", label="Levendefodte")
-        plt.plot (df["år"], df["døde"],color="blue", label="Døde")
-        plt.title("Levendefodte_vs_døde - verdal 1951-2025")
+        plt.plot(df["år"], df["fødte"], color="red", label="Levendefødte")
+        plt.plot(df["år"], df["døde"], color="blue", label="Døde")
+        plt.title("Levendefødte vs døde - Verdal 1951-2025")
         plt.xlabel("År")
         plt.ylabel("Antall")
         plt.legend(frameon=False, loc="upper left")
-        self.__Ferdigstill() # plt.savefig(path)
-
+        self.__Ferdigstill()  # plt.savefig(path)
 
     def Folketilveksten(self) -> None:
         df = self.df
@@ -343,20 +344,35 @@ class Grafer:
         yLim = plt.ylim()
 
         # Tangent til glidende regresjon
-        """
+        """"""
         sekantLowess = "fødselsoverskudd_sekant"
-        self.analyse.LeggInnKolonne(sekantLowess, self.analyse.LowessGlidendeRegresjon("fødselsoverskudd"))
+        self.analyse.LeggInnKolonne(
+            sekantLowess, self.analyse.LowessGlidendeRegresjon("fødselsoverskudd")
+        )
         dataSekant = self.analyse.SekantDiskret(sekantLowess, 2019, 2025)
-        plt.plot(self.analyse.df["år"], dataSekant["linje"], 
-                linestyle="-.",
-                color="black",
-                label=f"y = {dataSekant['a']:.2f}x {'+' if dataSekant['b'] > 0 else '-'} {abs(dataSekant['b']):.2f}")
+        plt.plot(
+            self.analyse.df["år"],
+            dataSekant["linje"],
+            linestyle="--",
+            color=self.farge["morkBla"],
+            label=f"y = {dataSekant['a']:.2f}x {'+' if dataSekant['b'] > 0 else '-'} {abs(dataSekant['b']):.2f}",
+        )
 
-        plt.scatter(dataSekant["x1"], dataSekant["y1"], 
-                    label=f"({np.int64(dataSekant["x1"])}, {np.int64(dataSekant["y1"])})", color=self.farge["kull"], zorder=5)
-        plt.scatter(dataSekant["x2"], dataSekant["y2"], 
-                    label=f"({np.int64(dataSekant["x2"])}, {np.int64(dataSekant["y2"])})", color=self.farge["kull"], zorder=5)
-        """
+        plt.scatter(
+            dataSekant["x1"],
+            dataSekant["y1"],
+            label=f"({np.int64(dataSekant['x1'])}, {np.int64(dataSekant['y1'])})",
+            color=self.farge["kull"],
+            zorder=5,
+        )
+        plt.scatter(
+            dataSekant["x2"],
+            dataSekant["y2"],
+            label=f"({np.int64(dataSekant['x2'])}, {np.int64(dataSekant['y2'])})",
+            color=self.farge["kull"],
+            zorder=5,
+        )
+        """"""
 
         plt.xlim(xLim)
         plt.ylim(yLim)
@@ -369,7 +385,6 @@ class Grafer:
         plt.legend(frameon=False)
         self.__Ferdigstill()
 
-
     def InnOgUtflytting(self) -> None:
         df = self.df
 
@@ -381,9 +396,7 @@ class Grafer:
             label="Innflytting",
         )
         plt.plot(
-            df["år"], df["utflytting"], 
-            color=self.farge["rosa"], 
-            label="Utflytting"
+            df["år"], df["utflytting"], color=self.farge["rosa"], label="Utflytting"
         )
         plt.fill_between(
             df["år"],
@@ -392,7 +405,7 @@ class Grafer:
             where=df["innflytting"] > df["utflytting"],
             interpolate=True,
             color=self.farge["lyseGronn"],
-            alpha=0.1
+            alpha=0.1,
         )
         plt.fill_between(
             df["år"],
@@ -401,7 +414,7 @@ class Grafer:
             where=df["utflytting"] > df["innflytting"],
             interpolate=True,
             color=self.farge["lyseRod"],
-            alpha=0.1
+            alpha=0.1,
         )
         # Aker etb
         """
@@ -415,8 +428,7 @@ class Grafer:
         plt.ylabel("Antall")
 
         plt.legend(frameon=False, loc="upper left")
-        self.__Ferdigstill() # plt.savefig(path)
-
+        self.__Ferdigstill()  # plt.savefig(path)
 
     def NettoFlytting(self):
         df = self.df
@@ -465,26 +477,24 @@ class Grafer:
         plt.legend(frameon=False)
         self.__Ferdigstill()
 
-
     def StatistikkTabell(self) -> None:
         df = self.df.copy()  # Unngå mutasjon på original df
 
         opprinneligeKolonner = ["fødte", "døde", "netto_flytting", "folketilvekst"]
-        
+
         stats = df[opprinneligeKolonner].describe()
         verdier = stats.loc[["mean", "std", "min", "25%", "75%", "max"]].round(1)
-        
+
         # Beregn CV (Standardavvik / Gjennomsnitt) for hver kolonne
         cvRad = (stats.loc["std"] / stats.loc["mean"]).round(2)
         verdier.loc["CV"] = cvRad
 
-
         # Legger inn "statistikk i toppen"
         verdier = verdier.reset_index().rename(columns={"index": "Statistikk"})
-        verdier["Statistikk"] = verdier["Statistikk"].str.upper() 
+        verdier["Statistikk"] = verdier["Statistikk"].str.upper()
 
         kolonneTitel = [navn.replace("_", "").title() for navn in opprinneligeKolonner]
-        header = ["Statistikk"] + kolonneTitel 
+        header = ["Statistikk"] + kolonneTitel
 
         plt.figure()
         plt.axis("off")
@@ -505,7 +515,6 @@ class Grafer:
             tabell[(0, j)].set_facecolor(self.farge["morkBla"])
             tabell[(0, j)].set_text_props(color="white", fontweight="bold")
 
-        
         for i in range(1, len(verdier) + 1):
             for j in range(len(header)):
                 tabell[(i, j)].set_facecolor(
@@ -514,17 +523,14 @@ class Grafer:
 
         self.__Ferdigstill()
 
-
-
-
-
-
     def DekadeStatistikkTabell(self) -> None:
-        df = self.df.copy() # .copy() for å slippe referanse(ptr) til df
+        df = self.df.copy()  # .copy() for å slippe referanse(ptr) til df
 
         # interpolerer resultatet 1.juli, for å kompensere for at folk dør
         # Bruker 31.des for å med 2025
-        df["befolkning_31des"] = df["befolkning"] + df["fødte"] - df["døde"] + df["netto_flytting"]
+        df["befolkning_31des"] = (
+            df["befolkning"] + df["fødte"] - df["døde"] + df["netto_flytting"]
+        )
         df["middelbefolkning"] = df["befolkning"] + df["befolkning_31des"] / 2
 
         df["dekade"] = (df["år"] // 10) * 10
@@ -532,11 +538,14 @@ class Grafer:
             ["fødte", "døde", "netto_flytting", "folketilvekst", "middelbefolkning"]
         ].sum()
 
-
         gruppe["fødsels_prosent"] = gruppe["fødte"] / gruppe["middelbefolkning"] * 100
         gruppe["døde_prosent"] = gruppe["døde"] / gruppe["middelbefolkning"] * 100
-        gruppe["flytte_prosent"] = gruppe["netto_flytting"] / gruppe["middelbefolkning"] * 100
-        gruppe["folketilvekst_prosent"] = gruppe["folketilvekst"] / gruppe["middelbefolkning"] * 100
+        gruppe["flytte_prosent"] = (
+            gruppe["netto_flytting"] / gruppe["middelbefolkning"] * 100
+        )
+        gruppe["folketilvekst_prosent"] = (
+            gruppe["folketilvekst"] / gruppe["middelbefolkning"] * 100
+        )
 
         kolonnerTilTabell = [
             "dekade",
@@ -570,7 +579,6 @@ class Grafer:
         plt.figure()
         plt.axis("off")
 
-
         tabell = plt.table(
             cellText=gruppe.values,
             colLabels=header,
@@ -594,15 +602,96 @@ class Grafer:
 
         self.__Ferdigstill()
 
+    def IllustrerMellomBefolkning(self) -> None:
+        """Lagen en sim av hvordan mellombefolkning regnes ut"""
+        df = self.df.copy()
+        antall = list()
+        gjennomsnitt_liste = list()
 
+        # lager en todimensjoal, med årtall som subliste og verdier er tilfeldige dødstidspunkt
+        for i in range(len(df["døde"])):
+            stage = list()
+            for _ in range(df["døde"].iloc[i]):
+                r = random.randint(1, 365)
+                stage.append(r)
+            antall.append(stage)
+
+        # finner gjennomsnitt for hvert år
+        for i, j in zip(range(len(df["døde"])), antall):
+            gjennomsnitt_liste.append(np.mean(j))
+
+        minst = np.min(gjennomsnitt_liste)
+        størst = np.max(gjennomsnitt_liste)
+        snitt = np.mean(gjennomsnitt_liste)
+        idealmål = 365 / 2
+
+        # lager liste med hvilket tiår de tilhører og gjennomsnitt for det tiåret
+        df["dekade"] = [(års_tall // 10) * 10 for års_tall in df["år"]]
+        df["verdi"] = gjennomsnitt_liste
+        gyldig = df["dekade"] != 0
+
+        df["flat_linje"] = df[gyldig].groupby("dekade")["verdi"].transform("mean")
+
+        plt.figure(figsize=(16, 9))
+        plt.bar(df["år"], gjennomsnitt_liste, color=self.farge["bla"])
+        plt.ylim(minst - 5, størst + 5)
+        plt.axhline(
+            y=snitt,
+            linestyle="--",
+            color=self.farge["morkBla"],
+            label=f"Gjennomsnitt av alle, {round(snitt - idealmål, 2)} unna idealmål (y = {round(snitt, 2)})",
+            zorder=2,
+        )
+
+        plt.step(
+            df["år"],
+            df["flat_linje"],
+            where="post",
+            label="Gjennomsnitt per tiår",
+            color="red",
+            linewidth=2,
+        )
+
+        plt.axhline(
+            y=idealmål,
+            linestyle=":",
+            color=self.farge["rosa"],
+            label=f"Ideellmål",
+            alpha=0.4,
+            zorder=1,
+        )
+
+        plt.text(
+            0.05,
+            0.05,
+            s="Monte-Carlo-simulering der hver person får en tilfeldig dødsdato mellom dag 1 og 365 for å simulere hvordan dødsfall kan fordeles gjennom året",
+            ha="left",
+            fontsize=8,
+            alpha=0.8,
+            transform=plt.gcf().transFigure,
+            wrap=True,
+        )
+        plt.title("[ Simulasjon ] Randomisering dødstidspunkt gjennomsnitt")
+        plt.ylabel("Gjennomsnitt dødsdag i året (1-365)")
+
+        plt.legend(frameon=True, loc="lower left")
+
+        yLim = plt.ylim()
+        plt.ylim(bottom=0)
+
+        sti = os.path.join(self.mappe, "null_illustrermellombefolkning.png")
+        plt.savefig(sti, dpi=150, bbox_inches="tight", facecolor="white")
+
+        plt.legend(frameon=False, loc="upper left")
+        plt.ylim(yLim)
+        plt.margins(0.01, 0.4)
+        self.__Ferdigstill()
 
     def IllustrerStandardavvik(self) -> None:
         df = self.df
         std = self.df[["fødte", "døde", "innflytting", "utflytting"]].std()
         mean = self.df[["fødte", "døde", "innflytting", "utflytting"]].mean()
         # self.__Ferdigstill()
-
-
 
     def TegnAlleGrafer(self) -> None:
         Logg(self, "Tegner alle grafer...")
