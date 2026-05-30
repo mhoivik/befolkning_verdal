@@ -1,0 +1,17 @@
+seSnitt = 0.000121  →  -log10(0.000121) ≈ 3.9  →  4 desimaler på snittet
+seStd = 0.0000888  →  -log10(0.0000888) ≈ 4.05  →  4 desimaler på std
+ 
+ -- Gjennomsnittlig dag i året (1951-2025, per kjøring altså)
+  Snitt:         183.000039292 dager
+  Median:        182.999961910 dager
+  Min:           176.124384740 dager
+  Max:           190.004063204 dager
+  Std Gj.Snitt : 1.208274484 dager
+  Standardfeil:  0.000120827 dager
+
+-- Standardavvik mellom år (innad i kjøring)
+  Snitt std:     10.426948848 dager
+  Median std:    10.410565035 dager
+  Min std:       5.930075427 dager
+  Max std:       16.417403796 dager
+  Standardfeil:  0.000088758 dager

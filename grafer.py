@@ -78,6 +78,7 @@ class Grafer:
             "oliven": "#6b8e23",
             "kull": "#34495e",
             "gra": "#7f8c8d",
+            "morkGra": "#555555",
             "blaHvit": "#eaf2fb",
         }
 
@@ -605,6 +606,7 @@ class Grafer:
     def IllustrerMellomBefolkning(self) -> None:
         """Lagen en sim av hvordan mellombefolkning regnes ut"""
         df = self.df.copy()
+        standardFeil = 1.208 # regnet med monte-carlo
         antall = list()
         gjennomsnitt_liste = list()
 
@@ -623,7 +625,7 @@ class Grafer:
         minst = np.min(gjennomsnitt_liste)
         størst = np.max(gjennomsnitt_liste)
         snitt = np.mean(gjennomsnitt_liste)
-        idealmål = 365 / 2
+        idealmål = (365 + 1) / 2 # en index, dermed blir de 183 
 
         # lager liste med hvilket tiår de tilhører og gjennomsnitt for det tiåret
         df["dekade"] = [(års_tall // 10) * 10 for års_tall in df["år"]]
@@ -632,7 +634,7 @@ class Grafer:
 
         df["flat_linje"] = df[gyldig].groupby("dekade")["verdi"].transform("mean")
 
-        plt.figure(figsize=(16, 9))
+        fig, ax = plt.subplots(figsize=(16, 9))
         plt.bar(df["år"], gjennomsnitt_liste, color=self.farge["bla"])
         plt.ylim(minst - 5, størst + 5)
         plt.axhline(
@@ -652,27 +654,25 @@ class Grafer:
             linewidth=2,
         )
 
-        plt.axhline(
-            y=idealmål,
-            linestyle=":",
-            color=self.farge["rosa"],
-            label=f"Ideellmål",
-            alpha=0.4,
-            zorder=1,
-        )
-
         plt.text(
             0.05,
             0.05,
             s="Monte-Carlo-simulering der hver person får en tilfeldig dødsdato mellom dag 1 og 365 for å simulere hvordan dødsfall kan fordeles gjennom året",
             ha="left",
+            style="italic",
             fontsize=8,
             alpha=0.8,
             transform=plt.gcf().transFigure,
             wrap=True,
-        )
+        )        
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['left'].set_color(self.farge["blaHvit"])
+        ax.spines['bottom'].set_color(self.farge["blaHvit"])
         plt.title("[ Simulasjon ] Randomisering dødstidspunkt gjennomsnitt")
         plt.ylabel("Gjennomsnitt dødsdag i året (1-365)")
+        plt.xticks(fontsize=12, color=self.farge["morkGra"])
+        plt.yticks(fontsize=12, color=self.farge["morkGra"])
 
         plt.legend(frameon=True, loc="lower left")
 
@@ -681,6 +681,25 @@ class Grafer:
 
         sti = os.path.join(self.mappe, "null_illustrermellombefolkning.png")
         plt.savefig(sti, dpi=150, bbox_inches="tight", facecolor="white")
+        """
+        plt.axhline(
+            y=idealmål,
+            linestyle=":",
+            color=self.farge["rosa"],
+            label=f"Ideellmål",
+            alpha=0.4,
+            zorder=1,
+        )
+        """
+
+        plt.fill_between(
+            df["år"],
+            idealmål - standardFeil,
+            idealmål + standardFeil,
+            color=self.farge["lilla"],
+            alpha=0.15,
+            label=f"± Standardfeil ({standardFeil})",
+        )
 
         plt.legend(frameon=False, loc="upper left")
         plt.ylim(yLim)

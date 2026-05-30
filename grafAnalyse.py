@@ -3,6 +3,8 @@ from numpy.polynomial import Polynomial
 import pandas as pd
 import statsmodels.api as sm
 
+from logger import Logg
+
 # To-Do
 # - GrafAnalyse bør være stateless. bør ikke ha en egen instance av DataFrame
 # heller parameter x, y variabel. (pd.Series, dict, tup arr?)
@@ -94,6 +96,42 @@ class GrafAnalyse:
             "x2" :x2,
             "y2" :y2
         }
+    
+    def MonteCarloDødeSim(self, antallSim: int = 1000) -> None:
+        df = self.df.copy()
+        
+        alleSnitt = []
+        alleStd = []
+
+        Logg(self, f"Kjører {antallSim} simuleringer")
+
+        for _ in range(antallSim):
+            gjennomsnittListe = []
+            
+            # simulerer dødfall og gir ut dato
+            for i in range(len(df["døde"])):
+                antall_døde = df["døde"].iloc[i]
+                # genererer alle tilfeldige dager for dette året på én gang
+                tilfeldige_dager = np.random.randint(1, 366, size=antall_døde)
+                gjennomsnittListe.append(np.mean(tilfeldige_dager))
+            
+            # lagrer resultatene for denne unike kjøringen
+            alleSnitt.append(np.mean(gjennomsnittListe))
+            alleStd.append(np.std(gjennomsnittListe))
+
+        Logg(self, f"Stats etter {antallSim} kjøringer")
+        
+        print("-- Gjennomsnitt")
+        print(f"Gjennomsnittlig alle dager: {np.mean(alleSnitt):.2f} dager (Ideellmål: 182.5)")
+        print(f"Median: {np.median(alleSnitt):.2f} dager")
+        print(f"Min: {np.min(alleSnitt):.2f} dager")
+        print(f"Max: {np.max(alleSnitt):.2f} dager")
+        
+        print(f"\n-- Standardavvik:")
+        print(f"Gjennomsnittlig std (alle dager):    {np.mean(alleStd):.2f} dager")
+        print(f"Min std: {np.min(alleStd):.2f} dager")
+        print(f"Max std: {np.max(alleStd):.2f} dager")
+
 
 
     def GlidendeGjennomsnitt(self, kolonneNavn: str, k=7):

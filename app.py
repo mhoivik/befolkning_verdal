@@ -44,7 +44,6 @@ class App:
 
         Logg(self, "Fil godkjent")
         Logg(self, "Begynner med grafer")
-        
 
         graf = Grafer(self.df)
         graf.TegnAlleGrafer()
