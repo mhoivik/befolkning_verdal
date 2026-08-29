@@ -15,9 +15,15 @@ class App:
         self.stiData = r"data.csv"
         self.df = None
 
-    def __del__(self) -> None:
+    def __del__(
+        self,
+    ) -> None:  # Litt dårlig praksis med å bruke __del__, men dette er ikke kritisk
         Logg(self, "Alle oppgaver fullført")
         Logg(self, "Deinitialisert...")
+        Logg(
+            self,
+            f'\n{"\033[1m"}Du finner alle png til grafene i mappen "grafer/" {"\033[0m"}',
+        )
 
     def Finnes(self, filnavn):
         Logg(self, f"Sjekker om {filnavn} finnes...")
@@ -27,13 +33,14 @@ class App:
         except:
             return False
 
-    
     def Run(self) -> None:
         # sjekker at filen(e) er i orden
         if not self.Finnes(self.stiData):
             if not self.Finnes(self.stiUsorterData):
                 print("Error: Mangler inndata, kunne ikke kjøre programmet")
-                raise FileNotFoundError("Verken ubehandlet_data.csv eller data.csv ble funnet")
+                raise FileNotFoundError(
+                    "Verken ubehandlet_data.csv eller data.csv ble funnet"
+                )
             Logg(self, "Har ikke data.csv")
             Logg(self, "Behandler data...")
             self.df = DataHenter(self.stiUsorterData).FormaterData()
@@ -58,10 +65,7 @@ class App:
         # graf.NettoFlytting()
         # graf.StatistikkTabell()
         # graf.DekadeStatistikkTabell()
-        
+
         """Ikke Implementer"""
         # graf.IllustrerStandardavvik("befolkning")
         # graf.BefolkningsVekst()
-
-
-        

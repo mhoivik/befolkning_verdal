@@ -31,3 +31,16 @@ python main.py
 
 ### 5. Resultat
 Programmet vil lage en mappe `grafer` og legger inn grafene i png-format.
+
+Mange mattefaglige poenger er klare til bruk, men kommentert ut. Disse finner du i grafer.py, og du kan endre på dem som du vil.
+
+
+
+**Utvalgte bilder fra projektet:**
+
+<img src="README/befolkning_prosjekter_fra_start.png" alt="Bilde 1" width="50%">
+<img src="README/folketilveksten.png" alt="Bilde 3" width="50%">
+<img src="README/innogutflytting.png" alt="Bilde 4" width="50%">
+<img src="README/levendefodtmotdode.png" alt="Bilde 5" width="50%">
+<img src="README/dekadestatistikktabell.png" alt="Bilde 2" width="50%">
+<img src="README/statistikktabell.png" alt="Bilde 6" width="50%">
